@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spinor Visualization Demo</title>
+  <link rel="stylesheet" href="style.css?v=16">
+</head>
+<body>
+  <header>
+    <h1>Spinor Visualization</h1>
+  </header>
+  <main>
+    <section id="controls">
+      <div class="control-row">
+        <button id="addBasis">Add Basis</button>
+        <button id="clear">Clear All</button>
+      </div>
+      <div id="basisList"></div>
+      <div class="control-row">
+        <label>Magnetic field magnitude: <input id="bMag" type="range" min="0" max="10" step="0.1" value="1"></label>
+        <label>
+          <span id="bThetaLabel">Field θ 90°</span>
+          <input id="bTheta" type="range" min="0" max="180" value="90">
+        </label>
+        <label>
+          <span id="bPhiLabel">Field φ 0°</span>
+          <input id="bPhi" type="range" min="0" max="360" value="0">
+        </label>
+        <button id="togglePlay">Play</button>
+      </div>
+    </section>
+
+    <section id="visuals">
+      <div id="clocks"></div>
+      <div id="three"></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script type="module" src="src/main-v2.js?v=19"></script>
+</body>
+</html>
