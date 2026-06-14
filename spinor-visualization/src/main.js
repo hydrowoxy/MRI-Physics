@@ -34,6 +34,30 @@ let playing = false;
 
 const basisListEl = document.getElementById('basisList');
 
+function formatComplex(z){
+  const re = z.re.toFixed(2);
+  const imAbs = Math.abs(z.im).toFixed(2);
+  const sign = z.im < 0 ? '-' : '+';
+  return `${re} ${sign} ${imAbs}i`;
+}
+
+function updateBasisMath(basis, coords){
+  if (!basis.mathEl) return;
+  const [a, b] = spinor;
+  const [f, g] = coords;
+  basis.mathEl.textContent = [
+    `f = a cos(theta/2) + b e^(-i phi) sin(theta/2)`,
+    `g = -a e^(i phi) sin(theta/2) + b cos(theta/2)`,
+    ``,
+    `theta = ${basis.theta.toFixed(0)} deg, phi = ${basis.phi.toFixed(0)} deg`,
+    `a = ${formatComplex(a)}`,
+    `b = ${formatComplex(b)}`,
+    ``,
+    `f = ${formatComplex(f)}`,
+    `g = ${formatComplex(g)}`,
+  ].join('\n');
+}
+
 function syncExpectationVisualization(){
   const v = spinExpectationVectorFromDefaultBasis(spinor);
   basisView.setExpectationVector(v.x, v.y, v.z);
@@ -44,6 +68,7 @@ function updateClocks(){
     const coords = changeOfBasis(spinor, b.theta, b.phi);
     b.clockA.setComplex(coords[0]);
     b.clockB.setComplex(coords[1]);
+    updateBasisMath(b, coords);
   });
   basisView.setBases(bases);
   syncFieldVisualization();
@@ -120,9 +145,12 @@ function addBasis(theta=0, phi=0, name='Basis'){
 
   controls.appendChild(thLabel); controls.appendChild(thRange); controls.appendChild(phLabel); controls.appendChild(phRange); controls.appendChild(removeBtn);
   card.appendChild(title); card.appendChild(controls);
+  const mathEl = document.createElement('pre');
+  mathEl.className = 'basis-math';
+  card.appendChild(mathEl);
   basisListEl.appendChild(card);
 
-  const basis = { theta: Number(theta), phi: Number(phi), clockA, clockB, card };
+  const basis = { theta: Number(theta), phi: Number(phi), clockA, clockB, card, mathEl };
   basis.color = color;
   basis.isDefault = id === 0;
   bases.push(basis);
