@@ -11,10 +11,6 @@ header { margin-bottom: 8px }
 .label { font-size:12px; color:#444 }
 
 #basisList { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap }
-.basis-card { padding:8px; background:#fff; border:1px solid #e3e6ee; border-radius:6px; display:flex; flex-direction:column; gap:8px; align-items:stretch; min-width: 320px }
+.basis-card { padding:8px; background:#fff; border:1px solid #e3e6ee; border-radius:6px; display:flex; gap:8px; align-items:center }
 .basis-card input[type="range"]{ width:120px }
-.basis-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
-.basis-math { padding:8px 10px; border-radius:6px; background:linear-gradient(180deg, rgba(37,99,235,0.06), rgba(37,99,235,0.02)); border:1px solid rgba(37,99,235,0.12) }
-.basis-math-title { font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#334155; margin-bottom:6px }
-.basis-math-body { display:flex; flex-direction:column; gap:4px; color:#0f172a }
-.basis-math-body .katex-display { margin:0 }
+.basis-controls { display:flex; gap:8px; align-items:center }

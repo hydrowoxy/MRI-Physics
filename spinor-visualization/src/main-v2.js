@@ -70,7 +70,6 @@ function updateClocks(){
     b.clockB.setComplex(coords[1]);
   });
   basisView.setBases(bases);
-  bases.forEach((basis) => renderBasisMath(basis));
   syncFieldVisualization();
   syncExpectationVisualization();
 }
@@ -84,74 +83,6 @@ function normalizeSpinor(){
 
 function normalizeDegrees(deg){
   return ((deg % 360) + 360) % 360;
-}
-
-function latexNumber(value, digits = 3){
-  const rounded = Number(value.toFixed(digits));
-  return Object.is(rounded, -0) ? '0' : `${rounded}`;
-}
-
-function latexComplex(z, digits = 3){
-  const re = latexNumber(z.re, digits);
-  const imValue = Number(z.im.toFixed(digits));
-  const im = latexNumber(Math.abs(imValue), digits);
-  if (imValue === 0) return re;
-  if (re === '0') return `${imValue < 0 ? '-' : ''}${im}i`;
-  const sign = imValue >= 0 ? '+' : '-';
-  return `${re} ${sign} ${im}i`;
-}
-
-function latexPolar(z, digits = 3){
-  const mag = Math.hypot(z.re, z.im);
-  const phase = Math.atan2(z.im, z.re);
-  return `${latexNumber(mag, digits)} e^{i${latexNumber(phase, digits)}}`;
-}
-
-function alignedLatex(lines){
-  return String.raw`\begin{aligned}${lines.join(String.raw`\\`)}\end{aligned}`;
-}
-
-function renderLatexBlock(target, latex){
-  target.replaceChildren();
-  katex.render(latex, target, { displayMode: true, throwOnError: false });
-}
-
-function renderBasisMath(basis){
-  if (!basis.mathBody) return;
-
-  const theta = Number(basis.theta);
-  const phi = Number(basis.phi);
-  const halfTheta = (theta * Math.PI / 180) / 2;
-  const phiRad = phi * Math.PI / 180;
-  const cosHalf = Math.cos(halfTheta);
-  const sinHalf = Math.sin(halfTheta);
-
-  const a = spinor[0];
-  const b = spinor[1];
-  const eNegIphi = complex(Math.cos(phiRad), -Math.sin(phiRad));
-  const eIphi = complex(Math.cos(phiRad), Math.sin(phiRad));
-  const f = cAdd(cMul(a, complex(cosHalf, 0)), cMul(cMul(b, eNegIphi), complex(sinHalf, 0)));
-  const g = cAdd(cMul(cMul(a, eIphi), complex(-sinHalf, 0)), cMul(b, complex(cosHalf, 0)));
-
-  const body = basis.mathBody;
-  body.replaceChildren();
-
-  const fBlock = document.createElement('div');
-  const gBlock = document.createElement('div');
-
-  renderLatexBlock(fBlock, alignedLatex([
-    String.raw`f(a,b,\theta,\phi) &= a\cos\left(\frac{\theta}{2}\right) + b e^{-i\phi}\sin\left(\frac{\theta}{2}\right)`,
-    String.raw`&= (${latexComplex(a)})\cos\left(\frac{\theta}{2}\right) + (${latexComplex(b)})e^{-i\phi}\sin\left(\frac{\theta}{2}\right)`,
-    String.raw`&= ${latexComplex(f)} = ${latexPolar(f)}`,
-  ]));
-
-  renderLatexBlock(gBlock, alignedLatex([
-    String.raw`g(a,b,\theta,\phi) &= -a e^{i\phi}\sin\left(\frac{\theta}{2}\right) + b\cos\left(\frac{\theta}{2}\right)`,
-    String.raw`&= -(${latexComplex(a)})e^{i\phi}\sin\left(\frac{\theta}{2}\right) + (${latexComplex(b)})\cos\left(\frac{\theta}{2}\right)`,
-    String.raw`&= ${latexComplex(g)} = ${latexPolar(g)}`,
-  ]));
-
-  body.append(fBlock, gBlock);
 }
 
 function createSnapState(){
@@ -219,28 +150,12 @@ function addBasis(theta=0, phi=0, name='Basis'){
   removeBtn.title = id === 0 ? 'The original basis cannot be removed' : 'Remove this basis';
 
   controls.appendChild(thLabel); controls.appendChild(thRange); controls.appendChild(phLabel); controls.appendChild(phRange); controls.appendChild(removeBtn);
-  card.appendChild(title);
+  card.appendChild(title); card.appendChild(controls);
   basisListEl.appendChild(card);
 
   const basis = { theta: Number(theta), phi: Number(phi), clockA, clockB, card };
   basis.color = color;
   basis.isDefault = id === 0;
-  if (!basis.isDefault) {
-    const mathBlock = document.createElement('div');
-    mathBlock.className = 'basis-math';
-    const mathTitle = document.createElement('div');
-    mathTitle.className = 'basis-math-title';
-    mathTitle.textContent = 'Basis-change math';
-    const mathBody = document.createElement('div');
-    mathBody.className = 'basis-math-body';
-    mathBlock.appendChild(mathTitle);
-    mathBlock.appendChild(mathBody);
-    card.appendChild(mathBlock);
-    basis.mathBlock = mathBlock;
-    basis.mathTitle = mathTitle;
-    basis.mathBody = mathBody;
-  }
-  card.appendChild(controls);
   bases.push(basis);
 
   let updatingSliders = false;
