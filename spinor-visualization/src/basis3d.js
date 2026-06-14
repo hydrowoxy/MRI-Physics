@@ -1,3 +1,5 @@
+import { basisDirection } from './physics/index.js?v=2';
+
 // Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {
   constructor(container) {
@@ -396,18 +398,8 @@ export class Basis3D {
   }
 
   _basisDirection(thetaDeg, phiDeg){
-    const th = thetaDeg * Math.PI/180;
-    const ph = phiDeg * Math.PI/180;
-    // Angles are defined in the simulation's default-basis frame.
-    // Map default-frame axes -> lab-frame axes as:
-    // x_default -> z_lab, y_default -> x_lab, z_default -> y_lab.
-    // With n_default = (sin th cos ph, sin th sin ph, cos th), this yields:
-    // n_lab = (sin th sin ph, cos th, sin th cos ph).
-    return new THREE.Vector3(
-      Math.sin(th) * Math.sin(ph),
-      Math.cos(th),
-      -Math.sin(th) * Math.cos(ph)
-    ).normalize();
+    const direction = basisDirection(thetaDeg, phiDeg);
+    return new THREE.Vector3(direction.x, direction.y, direction.z).normalize();
   }
 
   _clearArrows(){

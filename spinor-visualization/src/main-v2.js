@@ -1,6 +1,20 @@
 import { Clock } from './clock.js?v=19';
 import { Basis3D } from './basis3d.js?v=19';
-import { complex, cMul, cAdd, basisRotationMatrix } from './operators-v2.js?v=16';
+import {
+  inverseChangeOfBasis,
+  spinExpectationVectorFromDefaultBasis,
+  timeEvolveSpinorInField,
+} from './physics/index.js?v=2';
+import {
+  complementaryMagnitude,
+  degreesToRadians,
+  normalizedAmplitudePair,
+  normalizeDegrees,
+  normalizeSpinor as normalizeSpinorRule,
+  spinorComponentMagnitude,
+  spinorComponentPhaseDegrees,
+  spinorFromPolarComponents,
+} from './math/index.js?v=1';
 
 const clocksContainer = document.getElementById('clocks');
 const threeContainer = document.getElementById('three');
@@ -12,49 +26,13 @@ const basisPalette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0
 let bases = [];
 
 const initialMag0 = 0.8, initialPhase0 = 0.2;
-const initialMag1 = Math.sqrt(Math.max(0, 1 - initialMag0*initialMag0));
+const initialMag1 = complementaryMagnitude(initialMag0);
 const initialPhase1 = -0.4;
-let spinor = [ complex(initialMag0 * Math.cos(initialPhase0), initialMag0 * Math.sin(initialPhase0)), complex(initialMag1 * Math.cos(initialPhase1), initialMag1 * Math.sin(initialPhase1)) ];
+let spinor = spinorFromPolarComponents(initialMag0, initialPhase0, initialMag1, initialPhase1);
 
 let playing = false;
 
 const basisListEl = document.getElementById('basisList');
-
-function conj(a){ return { re: a.re, im: -a.im }; }
-function matDag(U){
-  return [[conj(U[0][0]), conj(U[1][0])],[conj(U[0][1]), conj(U[1][1])]];
-}
-function matApply(U, v){
-  const a = cAdd(cMul(U[0][0], v[0]), cMul(U[0][1], v[1]));
-  const b = cAdd(cMul(U[1][0], v[0]), cMul(U[1][1], v[1]));
-  return [a,b];
-}
-
-function spinExpectationVectorFromDefaultBasis(state){
-  // Default basis is +/-y eigenbasis. Convert to z-basis, then compute Bloch expectation.
-  const invSqrt2 = 1 / Math.sqrt(2);
-  const a = state[0];
-  const b = state[1];
-
-  const alpha = {
-    re: (a.re + b.re) * invSqrt2,
-    im: (a.im + b.im) * invSqrt2,
-  };
-  const beta = {
-    re: (-a.im + b.im) * invSqrt2,
-    im: (a.re - b.re) * invSqrt2,
-  };
-
-  const alphaConjBeta = {
-    re: alpha.re * beta.re + alpha.im * beta.im,
-    im: alpha.re * beta.im - alpha.im * beta.re,
-  };
-
-  const sx = 2 * alphaConjBeta.re;
-  const sy = 2 * alphaConjBeta.im;
-  const sz = (alpha.re * alpha.re + alpha.im * alpha.im) - (beta.re * beta.re + beta.im * beta.im);
-  return { x: sx, y: sy, z: sz };
-}
 
 function syncExpectationVisualization(){
   const v = spinExpectationVectorFromDefaultBasis(spinor);
@@ -63,9 +41,7 @@ function syncExpectationVisualization(){
 
 function updateClocks(){
   bases.forEach(b => {
-    const U = basisRotationMatrix(b.theta, b.phi);
-    const Ud = matDag(U);
-    const coords = matApply(Ud, spinor);
+    const coords = inverseChangeOfBasis(spinor, b.theta, b.phi);
     b.clockA.setComplex(coords[0]);
     b.clockB.setComplex(coords[1]);
   });
@@ -75,14 +51,7 @@ function updateClocks(){
 }
 
 function normalizeSpinor(){
-  const m0 = Math.hypot(spinor[0].re, spinor[0].im);
-  const m1 = Math.hypot(spinor[1].re, spinor[1].im);
-  const norm = Math.sqrt(m0*m0 + m1*m1) || 1;
-  spinor = [ { re: spinor[0].re / norm, im: spinor[0].im / norm }, { re: spinor[1].re / norm, im: spinor[1].im / norm } ];
-}
-
-function normalizeDegrees(deg){
-  return ((deg % 360) + 360) % 360;
+  spinor = normalizeSpinorRule(spinor);
 }
 
 function createSnapState(){
@@ -161,12 +130,12 @@ function addBasis(theta=0, phi=0, name='Basis'){
   let updatingSliders = false;
   if(id===0){
     controls.innerHTML = '';
-    const s0mag = document.createElement('input'); s0mag.type='range'; s0mag.min=0; s0mag.max=1; s0mag.step=0.01; s0mag.value = Math.hypot(spinor[0].re, spinor[0].im);
-    const s1mag = document.createElement('input'); s1mag.type='range'; s1mag.min=0; s1mag.max=1; s1mag.step=0.01; s1mag.value = Math.hypot(spinor[1].re, spinor[1].im);
+    const s0mag = document.createElement('input'); s0mag.type='range'; s0mag.min=0; s0mag.max=1; s0mag.step=0.01; s0mag.value = spinorComponentMagnitude(spinor[0]);
+    const s1mag = document.createElement('input'); s1mag.type='range'; s1mag.min=0; s1mag.max=1; s1mag.step=0.01; s1mag.value = spinorComponentMagnitude(spinor[1]);
     const s0magLabel = document.createElement('div'); s0magLabel.className='label'; s0magLabel.textContent = `|c0| ${Number(s0mag.value).toFixed(2)}`;
     const s1magLabel = document.createElement('div'); s1magLabel.className='label'; s1magLabel.textContent = `|c1| ${Number(s1mag.value).toFixed(2)}`;
-    const s0phase = document.createElement('input'); s0phase.type='range'; s0phase.min=0; s0phase.max=360; s0phase.step=1; s0phase.value = normalizeDegrees(Math.atan2(spinor[0].im, spinor[0].re) * 180/Math.PI);
-    const s1phase = document.createElement('input'); s1phase.type='range'; s1phase.min=0; s1phase.max=360; s1phase.step=1; s1phase.value = normalizeDegrees(Math.atan2(spinor[1].im, spinor[1].re) * 180/Math.PI);
+    const s0phase = document.createElement('input'); s0phase.type='range'; s0phase.min=0; s0phase.max=360; s0phase.step=1; s0phase.value = spinorComponentPhaseDegrees(spinor[0]);
+    const s1phase = document.createElement('input'); s1phase.type='range'; s1phase.min=0; s1phase.max=360; s1phase.step=1; s1phase.value = spinorComponentPhaseDegrees(spinor[1]);
     const s0phaseLabel = document.createElement('div'); s0phaseLabel.className='label'; s0phaseLabel.textContent = `arg0 ${Number(s0phase.value).toFixed(0)}°`;
     const s1phaseLabel = document.createElement('div'); s1phaseLabel.className='label'; s1phaseLabel.textContent = `arg1 ${Number(s1phase.value).toFixed(0)}°`;
     const resetBtn = document.createElement('button'); resetBtn.textContent='Reset';
@@ -191,25 +160,16 @@ function addBasis(theta=0, phi=0, name='Basis'){
 
       let m0 = Number(s0mag.value);
       let m1 = Number(s1mag.value);
-      const p0 = normalizeDegrees(Number(s0phase.value)) * Math.PI/180;
-      const p1 = normalizeDegrees(Number(s1phase.value)) * Math.PI/180;
-      if(from==='m0'){
-        m1 = Math.sqrt(Math.max(0, 1 - m0*m0));
-        s1mag.value = m1.toFixed(2);
-      } else if(from==='m1'){
-        m0 = Math.sqrt(Math.max(0, 1 - m1*m1));
-        s0mag.value = m0.toFixed(2);
-      } else {
-        const norm = Math.sqrt(m0*m0 + m1*m1) || 1;
-        m0 = m0 / norm; m1 = m1 / norm;
-        s0mag.value = m0.toFixed(2); s1mag.value = m1.toFixed(2);
-      }
+      const p0 = degreesToRadians(normalizeDegrees(Number(s0phase.value)));
+      const p1 = degreesToRadians(normalizeDegrees(Number(s1phase.value)));
+      [m0, m1] = normalizedAmplitudePair(m0, m1, from);
+      s0mag.value = m0.toFixed(2);
+      s1mag.value = m1.toFixed(2);
       s0magLabel.textContent = `|c0| ${Number(s0mag.value).toFixed(2)}`;
       s1magLabel.textContent = `|c1| ${Number(s1mag.value).toFixed(2)}`;
       s0phaseLabel.textContent = `arg0 ${normalizeDegrees(Number(s0phase.value)).toFixed(0)}°`;
       s1phaseLabel.textContent = `arg1 ${normalizeDegrees(Number(s1phase.value)).toFixed(0)}°`;
-      spinor[0] = { re: m0*Math.cos(p0), im: m0*Math.sin(p0) };
-      spinor[1] = { re: m1*Math.cos(p1), im: m1*Math.sin(p1) };
+      spinor = spinorFromPolarComponents(m0, p0, m1, p1);
       normalizeSpinor();
       updateClocks();
       updatingSliders = false;
@@ -220,10 +180,10 @@ function addBasis(theta=0, phi=0, name='Basis'){
     s0phase.addEventListener('input', ()=> applySpinorFromSliders());
     s1phase.addEventListener('input', ()=> applySpinorFromSliders());
     resetBtn.addEventListener('click', ()=>{
-      s0mag.value = Math.hypot(spinor[0].re, spinor[0].im).toFixed(2);
-      s1mag.value = Math.hypot(spinor[1].re, spinor[1].im).toFixed(2);
-      s0phase.value = normalizeDegrees(Math.atan2(spinor[0].im, spinor[0].re) * 180/Math.PI).toFixed(0);
-      s1phase.value = normalizeDegrees(Math.atan2(spinor[1].im, spinor[1].re) * 180/Math.PI).toFixed(0);
+      s0mag.value = spinorComponentMagnitude(spinor[0]).toFixed(2);
+      s1mag.value = spinorComponentMagnitude(spinor[1]).toFixed(2);
+      s0phase.value = spinorComponentPhaseDegrees(spinor[0]).toFixed(0);
+      s1phase.value = spinorComponentPhaseDegrees(spinor[1]).toFixed(0);
       applySpinorFromSliders();
     });
 
@@ -262,23 +222,15 @@ function step(dt){
   const bMag = parseFloat(document.getElementById('bMag').value || 1);
   const thetaDeg = parseFloat(document.getElementById('bTheta').value || 90);
   const phiDeg = parseFloat(document.getElementById('bPhi').value || 0);
-  const fieldBasis = basisRotationMatrix(thetaDeg, phiDeg);
-  const fieldBasisDag = matDag(fieldBasis);
-  const coeffs = matApply(fieldBasisDag, spinor);
-  const halfPhase = (bMag * dt) / 2;
-  const plusPhase = { re: Math.cos(-halfPhase), im: Math.sin(-halfPhase) };
-  const minusPhase = { re: Math.cos(halfPhase), im: Math.sin(halfPhase) };
-  const evolvedCoeffs = [cMul(plusPhase, coeffs[0]), cMul(minusPhase, coeffs[1])];
-  spinor = matApply(fieldBasis, evolvedCoeffs);
-  normalizeSpinor();
+  spinor = timeEvolveSpinorInField(spinor, dt, bMag, thetaDeg, phiDeg);
   updateClocks();
   const def = bases[0];
   if(def && def.spinControls){
     const { s0mag, s1mag, s0phase, s1phase, s0magLabel, s1magLabel, s0phaseLabel, s1phaseLabel } = def.spinControls;
-    const m0 = Math.hypot(spinor[0].re, spinor[0].im);
-    const m1 = Math.hypot(spinor[1].re, spinor[1].im);
-    const p0 = normalizeDegrees(Math.atan2(spinor[0].im, spinor[0].re) * 180/Math.PI);
-    const p1 = normalizeDegrees(Math.atan2(spinor[1].im, spinor[1].re) * 180/Math.PI);
+    const m0 = spinorComponentMagnitude(spinor[0]);
+    const m1 = spinorComponentMagnitude(spinor[1]);
+    const p0 = spinorComponentPhaseDegrees(spinor[0]);
+    const p1 = spinorComponentPhaseDegrees(spinor[1]);
     s0mag.value = m0.toFixed(2);
     s1mag.value = m1.toFixed(2);
     s0phase.value = p0.toFixed(0);
