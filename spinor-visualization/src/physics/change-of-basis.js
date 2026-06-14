@@ -11,7 +11,7 @@ g(a, b, theta, phi) =
   -a exp(i phi) sin(theta / 2) + b cos(theta / 2)
 
 changeOfBasis([a, b], theta, phi) = [f(a, b, theta, phi), g(a, b, theta, phi)]
-inverseChangeOfBasis uses the same rule with -theta.
+returnFromBasis uses the same rule with -theta.
 */
 
 export function changeOfBasisF(a, b, thetaDeg, phiDeg) {
@@ -48,13 +48,13 @@ export function changeOfBasis(spinor, thetaDeg, phiDeg) {
   ];
 }
 
-export function inverseChangeOfBasis(spinor, thetaDeg, phiDeg) {
+export function returnFromBasis(spinor, thetaDeg, phiDeg) {
   return changeOfBasis(spinor, -thetaDeg, phiDeg);
 }
 
 export function basisDirection(thetaDeg, phiDeg) {
   // Display direction is derived from the spin-up state in that basis.
   return spinExpectationVectorFromDefaultBasis(
-    inverseChangeOfBasis([{ re: 1, im: 0 }, { re: 0, im: 0 }], thetaDeg, phiDeg)
+    returnFromBasis([{ re: 1, im: 0 }, { re: 0, im: 0 }], thetaDeg, phiDeg)
   );
 }

@@ -1,7 +1,7 @@
 import {
   spinorComponentMagnitude,
   spinorComponentPhaseRadians,
-} from './math/index.js?v=1';
+} from './math/index.js';
 
 // Lightweight 2D clock component showing magnitude and phase for a complex number
 export class Clock {

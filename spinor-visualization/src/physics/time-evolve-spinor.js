@@ -1,4 +1,4 @@
-import { changeOfBasis, inverseChangeOfBasis } from './change-of-basis.js';
+import { changeOfBasis, returnFromBasis } from './change-of-basis.js';
 import { applyMagneticOperator } from './magnetic-operator.js';
 import { normalizeSpinor } from '../math/index.js';
 
@@ -10,15 +10,15 @@ Time evolution in an arbitrary magnetic-field direction.
 3. Convert back to the simulator/default basis.
 
 psi_next =
-  changeOfBasis(
-    magneticOperator(inverseChangeOfBasis(psi, theta, phi), dt, |B|),
+  returnFromBasis(
+    magneticOperator(changeOfBasis(psi, theta, phi), dt, |B|),
     theta,
     phi
   )
 */
 
 export function timeEvolveSpinorInField(spinor, dt, bMag, thetaDeg, phiDeg) {
-  const fieldBasisSpinor = inverseChangeOfBasis(spinor, thetaDeg, phiDeg);
+  const fieldBasisSpinor = changeOfBasis(spinor, thetaDeg, phiDeg);
   const evolvedCoeffs = applyMagneticOperator(fieldBasisSpinor, dt, bMag);
-  return normalizeSpinor(changeOfBasis(evolvedCoeffs, thetaDeg, phiDeg));
+  return normalizeSpinor(returnFromBasis(evolvedCoeffs, thetaDeg, phiDeg));
 }

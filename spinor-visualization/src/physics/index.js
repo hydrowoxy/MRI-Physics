@@ -3,7 +3,7 @@ export {
   changeOfBasis,
   changeOfBasisF,
   changeOfBasisG,
-  inverseChangeOfBasis,
+  returnFromBasis,
 } from './change-of-basis.js';
 export { applyMagneticOperator } from './magnetic-operator.js';
 export { spinExpectationVectorFromDefaultBasis } from './spin-expectation-vector.js';

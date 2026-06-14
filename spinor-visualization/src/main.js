@@ -1,19 +1,20 @@
-import { Clock } from './clock.js?v=13';
-import { Basis3D } from './basis3d.js?v=13';
+import { Clock } from './clock.js';
+import { Basis3D } from './basis3d.js';
 import {
-  inverseChangeOfBasis,
+  changeOfBasis,
+  spinExpectationVectorFromDefaultBasis,
   timeEvolveSpinorInField,
-} from './physics/index.js?v=2';
+} from './physics/index.js';
 import {
   complementaryMagnitude,
   degreesToRadians,
+  normalizedAmplitudePair,
   normalizeDegrees,
   normalizeSpinor as normalizeSpinorRule,
-  normalizedAmplitudePair,
   spinorComponentMagnitude,
   spinorComponentPhaseDegrees,
   spinorFromPolarComponents,
-} from './math/index.js?v=1';
+} from './math/index.js';
 
 const clocksContainer = document.getElementById('clocks');
 const threeContainer = document.getElementById('three');
@@ -24,8 +25,6 @@ const basisPalette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0
 
 let bases = [];
 
-// initial spinor (in computational basis |up> = [1,0], |down> = [0,1])
-// start with a nontrivial normalized spinor
 const initialMag0 = 0.8, initialPhase0 = 0.2;
 const initialMag1 = complementaryMagnitude(initialMag0);
 const initialPhase1 = -0.4;
@@ -35,18 +34,65 @@ let playing = false;
 
 const basisListEl = document.getElementById('basisList');
 
+function syncExpectationVisualization(){
+  const v = spinExpectationVectorFromDefaultBasis(spinor);
+  basisView.setExpectationVector(v.x, v.y, v.z);
+}
+
 function updateClocks(){
   bases.forEach(b => {
-    const coords = inverseChangeOfBasis(spinor, b.theta, b.phi);
+    const coords = changeOfBasis(spinor, b.theta, b.phi);
     b.clockA.setComplex(coords[0]);
     b.clockB.setComplex(coords[1]);
   });
   basisView.setBases(bases);
   syncFieldVisualization();
+  syncExpectationVisualization();
 }
 
 function normalizeSpinor(){
   spinor = normalizeSpinorRule(spinor);
+}
+
+function createSnapState(){
+  return { target: null };
+}
+
+function snapSliderValue(rawValue, targets, threshold, state){
+  if (state.target !== null) {
+    if (Math.abs(rawValue - state.target) <= threshold) {
+      return state.target;
+    }
+    state.target = null;
+  }
+
+  let bestTarget = null;
+  let bestDist = Infinity;
+  targets.forEach((t) => {
+    const d = Math.abs(rawValue - t);
+    if (d <= threshold && d < bestDist) {
+      bestDist = d;
+      bestTarget = t;
+    }
+  });
+
+  if (bestTarget !== null) {
+    state.target = bestTarget;
+    return bestTarget;
+  }
+  return rawValue;
+}
+
+const fieldThetaSnapState = createSnapState();
+const fieldPhiSnapState = createSnapState();
+
+function updateFieldLabels(){
+  const theta = Number(document.getElementById('bTheta').value || 90);
+  const phi = Number(document.getElementById('bPhi').value || 0);
+  const thetaLabel = document.getElementById('bThetaLabel');
+  const phiLabel = document.getElementById('bPhiLabel');
+  if (thetaLabel) thetaLabel.textContent = `Field θ ${theta.toFixed(0)}°`;
+  if (phiLabel) phiLabel.textContent = `Field φ ${phi.toFixed(0)}°`;
 }
 
 function addBasis(theta=0, phi=0, name='Basis'){
@@ -81,10 +127,8 @@ function addBasis(theta=0, phi=0, name='Basis'){
   basis.isDefault = id === 0;
   bases.push(basis);
 
-  // If this is the default computational basis (id===0) add spinor controls instead of theta/phi
   let updatingSliders = false;
   if(id===0){
-    // remove existing controls and replace with spinor controls
     controls.innerHTML = '';
     const s0mag = document.createElement('input'); s0mag.type='range'; s0mag.min=0; s0mag.max=1; s0mag.step=0.01; s0mag.value = spinorComponentMagnitude(spinor[0]);
     const s1mag = document.createElement('input'); s1mag.type='range'; s1mag.min=0; s1mag.max=1; s1mag.step=0.01; s1mag.value = spinorComponentMagnitude(spinor[1]);
@@ -100,21 +144,31 @@ function addBasis(theta=0, phi=0, name='Basis'){
     controls.appendChild(s1magLabel); controls.appendChild(s1mag); controls.appendChild(s1phaseLabel); controls.appendChild(s1phase);
     controls.appendChild(resetBtn); controls.appendChild(removeBtn);
 
+    const arg0SnapState = createSnapState();
+    const arg1SnapState = createSnapState();
+
     function applySpinorFromSliders(from){
       if(updatingSliders) return;
       updatingSliders = true;
-      // read mags and phases
+
+      if (from !== 'm0' && from !== 'm1') {
+        const snapped0 = snapSliderValue(Number(s0phase.value), [0, 90, 180, 270, 360], 5, arg0SnapState);
+        const snapped1 = snapSliderValue(Number(s1phase.value), [0, 90, 180, 270, 360], 5, arg1SnapState);
+        s0phase.value = snapped0.toFixed(0);
+        s1phase.value = snapped1.toFixed(0);
+      }
+
       let m0 = Number(s0mag.value);
       let m1 = Number(s1mag.value);
       const p0 = degreesToRadians(normalizeDegrees(Number(s0phase.value)));
       const p1 = degreesToRadians(normalizeDegrees(Number(s1phase.value)));
       [m0, m1] = normalizedAmplitudePair(m0, m1, from);
-      s0mag.value = m0.toFixed(2); s1mag.value = m1.toFixed(2);
+      s0mag.value = m0.toFixed(2);
+      s1mag.value = m1.toFixed(2);
       s0magLabel.textContent = `|c0| ${Number(s0mag.value).toFixed(2)}`;
       s1magLabel.textContent = `|c1| ${Number(s1mag.value).toFixed(2)}`;
       s0phaseLabel.textContent = `arg0 ${normalizeDegrees(Number(s0phase.value)).toFixed(0)}°`;
       s1phaseLabel.textContent = `arg1 ${normalizeDegrees(Number(s1phase.value)).toFixed(0)}°`;
-      // set spinor
       spinor = spinorFromPolarComponents(m0, p0, m1, p1);
       normalizeSpinor();
       updateClocks();
@@ -126,7 +180,6 @@ function addBasis(theta=0, phi=0, name='Basis'){
     s0phase.addEventListener('input', ()=> applySpinorFromSliders());
     s1phase.addEventListener('input', ()=> applySpinorFromSliders());
     resetBtn.addEventListener('click', ()=>{
-      // reset to initial values
       s0mag.value = spinorComponentMagnitude(spinor[0]).toFixed(2);
       s1mag.value = spinorComponentMagnitude(spinor[1]).toFixed(2);
       s0phase.value = spinorComponentPhaseDegrees(spinor[0]).toFixed(0);
@@ -134,7 +187,6 @@ function addBasis(theta=0, phi=0, name='Basis'){
       applySpinorFromSliders();
     });
 
-    // expose controls for external update
     basis.spinControls = { s0mag, s1mag, s0phase, s1phase, s0magLabel, s1magLabel, s0phaseLabel, s1phaseLabel };
   }
 
@@ -194,6 +246,7 @@ function syncFieldVisualization(){
   const bMag = parseFloat(document.getElementById('bMag').value || 1);
   const theta = parseFloat(document.getElementById('bTheta').value || 90);
   const phi = parseFloat(document.getElementById('bPhi').value || 0);
+  updateFieldLabels();
   basisView.setFieldDirection(theta, phi, bMag);
 }
 
@@ -209,9 +262,31 @@ document.getElementById('addBasis').addEventListener('click', ()=> addBasis(90,0
 document.getElementById('clear').addEventListener('click', ()=> { clearAll(); });
 document.getElementById('togglePlay').addEventListener('click', (e)=>{ playing = !playing; e.target.textContent = playing? 'Pause':'Play'; });
 document.getElementById('bMag').addEventListener('input', syncFieldVisualization);
-document.getElementById('bTheta').addEventListener('input', syncFieldVisualization);
-document.getElementById('bPhi').addEventListener('input', syncFieldVisualization);
+document.getElementById('bTheta').addEventListener('input', (event)=>{
+  const slider = event.target;
+  const snapped = snapSliderValue(Number(slider.value), [0, 90, 180], 5, fieldThetaSnapState);
+  slider.value = snapped.toFixed(0);
+  syncFieldVisualization();
+});
+document.getElementById('bPhi').addEventListener('input', (event)=>{
+  const slider = event.target;
+  const snapped = snapSliderValue(Number(slider.value), [0, 90, 180, 270, 360], 5, fieldPhiSnapState);
+  slider.value = snapped.toFixed(0);
+  syncFieldVisualization();
+});
 
-// start with the computational basis (spin up/spin down)
 addBasis(0,0,'Default');
 syncFieldVisualization();
+syncExpectationVisualization();
+window.__spinorDebug = {
+  getSpinor: () => spinor.map((z) => ({ re: z.re, im: z.im })),
+  getExpectation: () => {
+    const v = spinExpectationVectorFromDefaultBasis(spinor);
+    return { x: v.x, y: v.y, z: v.z };
+  },
+  getFieldValues: () => ({
+    bMag: document.getElementById('bMag').value,
+    bTheta: document.getElementById('bTheta').value,
+    bPhi: document.getElementById('bPhi').value,
+  }),
+};
