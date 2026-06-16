@@ -1,5 +1,6 @@
 import { Clock } from './clock.js';
 import { Basis3D } from './basis3d.js';
+import { renderChangeOfBasisMath } from './basis-math-display.js';
 import {
   changeOfBasis,
   spinExpectationVectorFromDefaultBasis,
@@ -34,28 +35,14 @@ let playing = false;
 
 const basisListEl = document.getElementById('basisList');
 
-function formatComplex(z){
-  const re = z.re.toFixed(2);
-  const imAbs = Math.abs(z.im).toFixed(2);
-  const sign = z.im < 0 ? '-' : '+';
-  return `${re} ${sign} ${imAbs}i`;
-}
-
 function updateBasisMath(basis, coords){
   if (!basis.mathEl) return;
-  const [a, b] = spinor;
-  const [f, g] = coords;
-  basis.mathEl.textContent = [
-    `f = a cos(theta/2) + b e^(-i phi) sin(theta/2)`,
-    `g = -a e^(i phi) sin(theta/2) + b cos(theta/2)`,
-    ``,
-    `theta = ${basis.theta.toFixed(0)} deg, phi = ${basis.phi.toFixed(0)} deg`,
-    `a = ${formatComplex(a)}`,
-    `b = ${formatComplex(b)}`,
-    ``,
-    `f = ${formatComplex(f)}`,
-    `g = ${formatComplex(g)}`,
-  ].join('\n');
+  basis.mathEl.textContent = renderChangeOfBasisMath({
+    spinor,
+    theta: basis.theta,
+    phi: basis.phi,
+    result: coords,
+  });
 }
 
 function syncExpectationVisualization(){
@@ -112,10 +99,13 @@ const fieldThetaSnapState = createSnapState();
 const fieldPhiSnapState = createSnapState();
 
 function updateFieldLabels(){
+  const bMag = Number(document.getElementById('bMag').value || 1);
   const theta = Number(document.getElementById('bTheta').value || 90);
   const phi = Number(document.getElementById('bPhi').value || 0);
+  const bMagLabel = document.getElementById('bMagLabel');
   const thetaLabel = document.getElementById('bThetaLabel');
   const phiLabel = document.getElementById('bPhiLabel');
+  if (bMagLabel) bMagLabel.textContent = `Magnetic field |B| ${bMag.toFixed(1)}`;
   if (thetaLabel) thetaLabel.textContent = `Field θ ${theta.toFixed(0)}°`;
   if (phiLabel) phiLabel.textContent = `Field φ ${phi.toFixed(0)}°`;
 }
