@@ -1,6 +1,6 @@
 import { changeOfBasis, returnFromBasis } from './change-of-basis.js';
-import { applyMagneticOperator } from './magnetic-operator.js';
-import { normalizeSpinor } from '../math/index.js';
+import { applyMagneticHamiltonian } from './magnetic-hamiltonian.js';
+import { normalizeSpinor } from './spinor.js';
 
 /*
 Time evolution in an arbitrary magnetic-field direction.
@@ -19,6 +19,6 @@ psi_next =
 
 export function timeEvolveSpinorInField(spinor, dt, bMag, thetaDeg, phiDeg) {
   const fieldBasisSpinor = changeOfBasis(spinor, thetaDeg, phiDeg);
-  const evolvedCoeffs = applyMagneticOperator(fieldBasisSpinor, dt, bMag);
+  const evolvedCoeffs = applyMagneticHamiltonian(fieldBasisSpinor, dt, bMag);
   return normalizeSpinor(returnFromBasis(evolvedCoeffs, thetaDeg, phiDeg));
 }

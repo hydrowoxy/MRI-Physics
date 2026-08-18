@@ -1,7 +1,7 @@
 import {
-  spinorComponentMagnitude,
-  spinorComponentPhaseRadians,
-} from './math/index.js';
+  complexMagnitude,
+  complexPhaseRadians,
+} from '../math/index.js';
 
 // Lightweight 2D clock component showing magnitude and phase for a complex number
 export class Clock {
@@ -37,7 +37,7 @@ export class Clock {
     ctx.clearRect(0,0,w,h);
     const cx = w/2, cy = h/2;
     const baseR = Math.min(w,h)/2 - 12;
-    const mag = spinorComponentMagnitude(this.value);
+    const mag = complexMagnitude(this.value);
     const displayR = baseR * Math.max(0, Math.min(1, mag));
     // faint guide circle at maximum size
     ctx.beginPath(); ctx.arc(cx,cy,baseR,0,Math.PI*2); ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=2; ctx.stroke();
@@ -47,7 +47,7 @@ export class Clock {
       ctx.beginPath(); ctx.arc(cx,cy,displayR*0.9,0,Math.PI*2); ctx.fillStyle='rgba(74,144,226,0.06)'; ctx.fill();
     }
     // hand for phase
-    const phase = spinorComponentPhaseRadians(this.value);
+    const phase = complexPhaseRadians(this.value);
     if (displayR > 0) {
       const visualPhase = -phase;
       const hx = cx + Math.cos(visualPhase) * (displayR - 10);

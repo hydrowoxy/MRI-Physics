@@ -1,4 +1,4 @@
-import { basisDirection } from './physics/index.js';
+import { basisDirection } from '../physics/index.js';
 
 // Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {
@@ -25,7 +25,6 @@ export class Basis3D {
     this.azimuth = Math.PI / 4;
     this.polar = Math.PI / 4;
     this.arrows = [];
-    this.fieldArrow = null;
     this.fieldGroup = null;
     this.expectationGroup = null;
     this.expectationSphere = null;
@@ -44,9 +43,6 @@ export class Basis3D {
 
     this._tick = this._tick.bind(this);
     requestAnimationFrame(this._tick);
-
-    // Debug access for diagnostics from console/playwright.
-    window.__basis3D = this;
   }
 
   _bindPointerControls(){
@@ -91,10 +87,6 @@ export class Basis3D {
     const z = this.radius * Math.sin(this.polar) * Math.sin(this.azimuth);
     this.camera.position.set(x, y, z);
     this.camera.lookAt(0,0,0);
-  }
-
-  setDirectionFromThetaPhi(thetaDeg, phiDeg){
-    this.defaultDirection = this._basisDirection(thetaDeg, phiDeg);
   }
 
   setBases(bases){
@@ -322,10 +314,6 @@ export class Basis3D {
     this.expectationGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction);
     this.expectationHalo.rotation.y += 0.03;
     this._recalculatePrecessionCircle();
-  }
-
-  setExpectationSphereVisible(visible){
-    if (this.expectationSphere) this.expectationSphere.visible = !!visible;
   }
 
   _initExpectationSphere(){

@@ -1,10 +1,14 @@
 export {
   basisDirection,
   changeOfBasis,
-  changeOfBasisF,
-  changeOfBasisG,
-  returnFromBasis,
 } from './change-of-basis.js';
-export { applyMagneticOperator } from './magnetic-operator.js';
-export { spinExpectationVectorFromDefaultBasis } from './spin-expectation-vector.js';
-export { timeEvolveSpinorInField } from './time-evolve-spinor.js';
+export {
+  complementaryMagnitude,
+  normalizedAmplitudePair,
+  normalizeSpinor,
+  spinorComponentMagnitude,
+  spinorComponentPhaseDegrees,
+  spinorFromPolarComponents,
+} from './spinor.js';
+export { spinExpectationVectorFromDefaultBasis } from './spin-expectation.js';
+export { timeEvolveSpinorInField } from './time-evolution.js';

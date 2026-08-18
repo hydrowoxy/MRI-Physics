@@ -1,5 +1,10 @@
-import { degreesToRadians, normalizeDegrees } from './angles.js';
-import { complex } from './complex.js';
+import {
+  complex,
+  complexMagnitude,
+  complexPhaseRadians,
+  degreesToRadians,
+  normalizeDegrees,
+} from '../math/index.js';
 
 export function complementaryMagnitude(magnitude) {
   return Math.sqrt(Math.max(0, 1 - magnitude * magnitude));
@@ -31,11 +36,11 @@ export function normalizeSpinor(spinor) {
 }
 
 export function spinorComponentMagnitude(component) {
-  return Math.hypot(component.re, component.im);
+  return complexMagnitude(component);
 }
 
-export function spinorComponentPhaseRadians(component) {
-  return Math.atan2(component.im, component.re);
+function spinorComponentPhaseRadians(component) {
+  return complexPhaseRadians(component);
 }
 
 export function spinorComponentPhaseDegrees(component) {

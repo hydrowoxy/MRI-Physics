@@ -14,7 +14,7 @@ radii/probabilities. The changing relative phase is what appears as precession
 after converting back to the display/default basis.
 */
 
-export function applyMagneticOperator(fieldBasisSpinor, dt, fieldMagnitude) {
+export function applyMagneticHamiltonian(fieldBasisSpinor, dt, fieldMagnitude) {
   const halfPhase = (fieldMagnitude * dt) / 2;
   const spinUpPhase = { re: Math.cos(-halfPhase), im: Math.sin(-halfPhase) };
   const spinDownPhase = { re: Math.cos(halfPhase), im: Math.sin(halfPhase) };

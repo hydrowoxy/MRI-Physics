@@ -1,5 +1,5 @@
 import { degreesToRadians, complexAdd, complexMul, complexScale } from '../math/index.js';
-import { spinExpectationVectorFromDefaultBasis } from './spin-expectation-vector.js';
+import { spinExpectationVectorFromDefaultBasis } from './spin-expectation.js';
 
 /*
 Change of basis for a spinor [a, b].
@@ -14,7 +14,7 @@ changeOfBasis([a, b], theta, phi) = [f(a, b, theta, phi), g(a, b, theta, phi)]
 returnFromBasis uses the same rule with -theta.
 */
 
-export function changeOfBasisF(a, b, thetaDeg, phiDeg) {
+function changeOfBasisF(a, b, thetaDeg, phiDeg) {
   const theta = degreesToRadians(thetaDeg);
   const phi = degreesToRadians(phiDeg);
   const cosHalf = Math.cos(theta / 2);
@@ -27,7 +27,7 @@ export function changeOfBasisF(a, b, thetaDeg, phiDeg) {
   );
 }
 
-export function changeOfBasisG(a, b, thetaDeg, phiDeg) {
+function changeOfBasisG(a, b, thetaDeg, phiDeg) {
   const theta = degreesToRadians(thetaDeg);
   const phi = degreesToRadians(phiDeg);
   const cosHalf = Math.cos(theta / 2);

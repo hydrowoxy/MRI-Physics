@@ -16,3 +16,11 @@ export function complexMul(a, b) {
 export function complexScale(a, scale) {
   return { re: a.re * scale, im: a.im * scale };
 }
+
+export function complexMagnitude(a) {
+  return Math.hypot(a.re, a.im);
+}
+
+export function complexPhaseRadians(a) {
+  return Math.atan2(a.im, a.re);
+}
