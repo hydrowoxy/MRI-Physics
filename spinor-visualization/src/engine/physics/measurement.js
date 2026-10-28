@@ -13,9 +13,9 @@ export function getSpinExpectationVector(components) {
   };
 
   return {
-    x: 2 * relative.im,
-    y: alphaProbability - betaProbability,
-    z: 2 * relative.re,
+    x: 2 * relative.re,
+    y: 2 * relative.im,
+    z: alphaProbability - betaProbability,
   };
 }
 

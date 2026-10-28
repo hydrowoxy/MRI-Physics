@@ -20,8 +20,10 @@ export function evolveSpinorInField(
   const cosine = Math.cos(halfAngle);
   const sine = Math.sin(halfAngle);
   const diagonal = complex(cosine, 0);
+  // U = cos(theta) I - i sin(theta) (nx sigma_x + ny sigma_y + nz sigma_z).
+  // The two off-diagonal entries differ in the sign of the y contribution.
   const offDiagonal = complex(
-    axis.y * sine,
+    -axis.y * sine,
     -axis.x * sine
   );
   const lowerOffDiagonal = complex(
