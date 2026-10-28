@@ -6,4 +6,3 @@ export * from './population.js';
 export * from './precession.js';
 export * from './simulation.js';
 export * from './spinor.js';
-export * from './spinor-functions.js';

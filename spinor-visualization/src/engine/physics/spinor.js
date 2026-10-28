@@ -1,4 +1,8 @@
-import { complex } from '../math/complex.js';
+import {
+  complex,
+  spinorComponentMagnitude,
+} from '../math/complex.js';
+import { spinorComponentPhaseDegrees } from '../math/rotations.js';
 
 export class Spinor {
   constructor(alpha = complex(1, 0), beta = complex(0, 0)) {
@@ -7,6 +11,22 @@ export class Spinor {
 
   get components() {
     return [this.alpha, this.beta];
+  }
+
+  get alphaMagnitude() {
+    return spinorComponentMagnitude(this.alpha);
+  }
+
+  get betaMagnitude() {
+    return spinorComponentMagnitude(this.beta);
+  }
+
+  get alphaPhaseDegrees() {
+    return spinorComponentPhaseDegrees(this.alpha);
+  }
+
+  get betaPhaseDegrees() {
+    return spinorComponentPhaseDegrees(this.beta);
   }
 
   setComponents(components) {

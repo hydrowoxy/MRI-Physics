@@ -8,6 +8,17 @@ export function normalizeDegrees(degrees) {
   return ((degrees % 360) + 360) % 360;
 }
 
+export function spinorFromPolarComponents(m0, phase0, m1, phase1) {
+  return [
+    { re: m0 * Math.cos(phase0), im: m0 * Math.sin(phase0) },
+    { re: m1 * Math.cos(phase1), im: m1 * Math.sin(phase1) },
+  ];
+}
+
+export function spinorComponentPhaseDegrees(component) {
+  return normalizeDegrees(Math.atan2(component.im, component.re) / DEGREE);
+}
+
 export function radiansToDegrees(radians) {
   return radians / DEGREE;
 }

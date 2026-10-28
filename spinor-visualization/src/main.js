@@ -1,9 +1,11 @@
 import {
   changeOfBasis,
-  complementaryMagnitude,
   spinExpectation,
-  spinorFromPolarComponents,
 } from './engine/index.js';
+import {
+  complementaryMagnitude,
+} from './engine/math/complex.js';
+import { spinorFromPolarComponents } from './engine/math/rotations.js';
 import { createBasisControls } from './view/basis-controls.js';
 import { renderChangeOfBasisMath } from './view/basis-math-display.js';
 import { Basis3D } from './view/basis3d.js';

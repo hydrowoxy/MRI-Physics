@@ -24,3 +24,30 @@ export function complexMagnitude(a) {
 export function complexPhaseRadians(a) {
   return Math.atan2(a.im, a.re);
 }
+
+export function complementaryMagnitude(magnitude) {
+  return Math.sqrt(Math.max(0, 1 - magnitude * magnitude));
+}
+
+export function normalizedAmplitudePair(m0, m1, changed = null) {
+  if (changed === 'm0') return [m0, complementaryMagnitude(m0)];
+  if (changed === 'm1') return [complementaryMagnitude(m1), m1];
+
+  const norm = Math.hypot(m0, m1) || 1;
+  return [m0 / norm, m1 / norm];
+}
+
+export function spinorComponentMagnitude(component) {
+  return complexMagnitude(component);
+}
+
+export function normalizeSpinor(spinor) {
+  const norm = Math.hypot(
+    spinorComponentMagnitude(spinor[0]),
+    spinorComponentMagnitude(spinor[1])
+  ) || 1;
+  return spinor.map((component) => complex(
+    component.re / norm,
+    component.im / norm
+  ));
+}

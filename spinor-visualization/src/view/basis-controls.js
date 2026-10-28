@@ -1,11 +1,14 @@
-import { degreesToRadians, normalizeDegrees } from '../engine/math/rotations.js';
 import {
   normalizedAmplitudePair,
   normalizeSpinor,
   spinorComponentMagnitude,
+} from '../engine/math/complex.js';
+import {
+  degreesToRadians,
+  normalizeDegrees,
   spinorComponentPhaseDegrees,
   spinorFromPolarComponents,
-} from '../engine/physics/index.js';
+} from '../engine/math/rotations.js';
 import { Clock } from './clock.js';
 import { createSnapState, snapSliderValue } from './snap-slider.js';
 
