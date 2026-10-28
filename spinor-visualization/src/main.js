@@ -1,6 +1,5 @@
 import {
   changeOfBasis,
-  spinExpectation,
 } from './engine/index.js';
 import {
   complementaryMagnitude,
@@ -11,7 +10,10 @@ import { renderChangeOfBasisMath } from './view/basis-math-display.js';
 import { Basis3D } from './view/basis3d.js';
 import { createFieldControls } from './view/field-controls.js';
 import { fieldVectorFromAngles } from './engine/math/rotations.js';
-import { precessSpinor } from './engine/physics/precession.js';
+import { Spinor } from './engine/physics/spinor.js';
+import { evolveSpinorInField } from './engine/physics/precession.js';
+import { getSpinExpectationVector } from './engine/physics/measurement.js';
+import { magneticFieldAt } from './engine/physics/magnetic-field.js';
 
 const clocksContainer = document.getElementById('clocks');
 const basisListEl = document.getElementById('basisList');
@@ -20,7 +22,9 @@ const basisPalette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0
 
 let bases = [];
 let playing = false;
-let spinor = spinorFromPolarComponents(0.8, 0.2, complementaryMagnitude(0.8), -0.4);
+const spinor = new Spinor(
+  ...spinorFromPolarComponents(0.8, 0.2, complementaryMagnitude(0.8), -0.4)
+);
 
 const fieldControls = createFieldControls({
   onChange: ({ theta, phi, magnitude }) => {
@@ -29,11 +33,11 @@ const fieldControls = createFieldControls({
 });
 
 function renderBasis(basis) {
-  const coords = changeOfBasis(spinor, basis.theta, basis.phi);
+  const coords = changeOfBasis(spinor.components, basis.theta, basis.phi);
   basis.clockA.setComplex(coords[0]);
   basis.clockB.setComplex(coords[1]);
   basis.mathEl.textContent = renderChangeOfBasisMath({
-    spinor,
+    spinor: spinor.components,
     theta: basis.theta,
     phi: basis.phi,
     result: coords,
@@ -45,10 +49,10 @@ function syncViews() {
   basisView.setBases(bases);
 
   const field = fieldControls.value();
-  const expectation = spinExpectation(spinor);
+  const expectation = getSpinExpectationVector(spinor.components);
   basisView.setFieldDirection(field.theta, field.phi, field.magnitude);
   basisView.setExpectationVector(expectation.x, expectation.y, expectation.z);
-  bases[0]?.syncSpinControls?.(spinor);
+  bases[0]?.syncSpinControls?.(spinor.components);
 }
 
 function addBasis(theta = 0, phi = 0, name = 'Basis') {
@@ -59,12 +63,12 @@ function addBasis(theta = 0, phi = 0, name = 'Basis') {
     color: basisPalette[id % basisPalette.length],
     theta,
     phi,
-    spinor,
+    spinor: spinor.components,
     clocksContainer,
     basisListEl,
     onBasisChange: syncViews,
     onSpinorChange: (nextSpinor) => {
-      spinor = nextSpinor;
+      spinor.setComponents(nextSpinor);
       syncViews();
     },
     onRemove: (removedBasis) => {
@@ -87,13 +91,18 @@ function clearExtraBases() {
   syncViews();
 }
 
-function step(dt) {
+function tick(dt, time) {
   const field = fieldControls.value();
-  spinor = precessSpinor(
-    spinor,
-    fieldVectorFromAngles(field.magnitude, field.theta, field.phi),
+  const fieldVector = magneticFieldAt({
+    b0: fieldVectorFromAngles(field.magnitude, field.theta, field.phi),
+    coordinate: { x: 0, y: 0, z: 0 },
+    time,
+  });
+  spinor.setComponents(evolveSpinorInField(
+    spinor.components,
+    fieldVector,
     dt
-  );
+  ));
   syncViews();
 }
 
@@ -101,7 +110,7 @@ let lastTime = performance.now();
 function loop(now) {
   const dt = (now - lastTime) / 1000;
   lastTime = now;
-  if (playing) step(dt);
+  if (playing) tick(dt, now / 1000);
   requestAnimationFrame(loop);
 }
 

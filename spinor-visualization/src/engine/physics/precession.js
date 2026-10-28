@@ -1,10 +1,18 @@
 import { complex, complexAdd, complexMul, complexScale } from '../math/complex.js';
 import { normalizeVector, vectorMagnitude } from '../math/rotations.js';
 
-export function precessSpinor(spinor, field, deltaTime, gyromagneticRatio = 1) {
+export function evolveSpinorInField(
+  components,
+  field,
+  deltaTime,
+  gyromagneticRatio = 1
+) {
   const fieldMagnitude = vectorMagnitude(field);
   if (fieldMagnitude === 0 || deltaTime === 0) {
-    return [complex(spinor[0].re, spinor[0].im), complex(spinor[1].re, spinor[1].im)];
+    return [
+      complex(components[0].re, components[0].im),
+      complex(components[1].re, components[1].im),
+    ];
   }
 
   const axis = normalizeVector(field);
@@ -24,12 +32,12 @@ export function precessSpinor(spinor, field, deltaTime, gyromagneticRatio = 1) {
 
   return [
     complexAdd(
-      complexMul(complexAdd(diagonal, zTerm), spinor[0]),
-      complexMul(offDiagonal, spinor[1])
+      complexMul(complexAdd(diagonal, zTerm), components[0]),
+      complexMul(offDiagonal, components[1])
     ),
     complexAdd(
-      complexMul(lowerOffDiagonal, spinor[0]),
-      complexMul(complexAdd(diagonal, complexScale(zTerm, -1)), spinor[1])
+      complexMul(lowerOffDiagonal, components[0]),
+      complexMul(complexAdd(diagonal, complexScale(zTerm, -1)), components[1])
     ),
   ];
 }

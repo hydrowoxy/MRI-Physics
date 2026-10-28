@@ -5,10 +5,9 @@
 The visual-free simulation engine lives in `src/engine/`:
 
 - `engine/math/` contains complex arithmetic and vector/coordinate transforms.
-- `engine/physics/spinor.js` and `population.js` contain stateful simulation
-  objects.
-- `engine/physics/measurement.js`, `precession.js`, `magnetic-field.js`, and
-  `boltzmann.js` contain stateless calculations.
+- `engine/physics/spinor.js` contains the single stateful spin object.
+- `engine/physics/measurement.js`, `precession.js`, and `magnetic-field.js`
+  contain stateless calculations.
 - `engine/index.js` is the public engine entry point.
 
 The engine accepts plain numbers and vectors and has no DOM, canvas, or UI

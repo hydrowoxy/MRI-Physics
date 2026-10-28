@@ -1,6 +1,6 @@
 import { complexAdd, complexMul, complexScale } from '../math/complex.js';
 import { degreesToRadians } from '../math/rotations.js';
-import { spinExpectation } from './measurement.js';
+import { getSpinExpectationVector } from './measurement.js';
 
 function changeOfBasisF(a, b, thetaDeg, phiDeg) {
   const theta = degreesToRadians(thetaDeg);
@@ -40,7 +40,7 @@ export function returnFromBasis(spinor, thetaDeg, phiDeg) {
 }
 
 export function basisDirection(thetaDeg, phiDeg) {
-  return spinExpectation(
+  return getSpinExpectationVector(
     returnFromBasis([{ re: 1, im: 0 }, { re: 0, im: 0 }], thetaDeg, phiDeg)
   );
 }

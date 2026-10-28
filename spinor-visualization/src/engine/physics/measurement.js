@@ -2,9 +2,9 @@ function probability(component) {
   return component.re * component.re + component.im * component.im;
 }
 
-export function spinExpectation(spinor) {
-  const alpha = spinor.alpha || spinor[0];
-  const beta = spinor.beta || spinor[1];
+export function getSpinExpectationVector(components) {
+  const alpha = components[0];
+  const beta = components[1];
   const alphaProbability = probability(alpha);
   const betaProbability = probability(beta);
   const relative = {
@@ -19,14 +19,14 @@ export function spinExpectation(spinor) {
   };
 }
 
-export function measurementProbabilities(spinor) {
-  const alpha = spinor.alpha || spinor[0];
-  const beta = spinor.beta || spinor[1];
+export function measurementProbabilities(components) {
+  const alpha = components[0];
+  const beta = components[1];
   return { alpha: probability(alpha), beta: probability(beta) };
 }
 
-export function measureAlongAxis(spinor, axis, random = Math.random) {
-  const expectation = spinExpectation(spinor);
+export function measureAlongAxis(components, axis, random = Math.random) {
+  const expectation = getSpinExpectationVector(components);
   const projection = expectation.x * axis.x
     + expectation.y * axis.y
     + expectation.z * axis.z;
