@@ -2,8 +2,7 @@
 
 ## Physics engine
 
-The visualizer imports a compatibility facade from `src/physics/`, while the
-visual-free simulation engine lives in `src/engine/`:
+The visual-free simulation engine lives in `src/engine/`:
 
 - `engine/math/` contains complex arithmetic and vector/coordinate transforms.
 - `engine/physics/spinor.js` and `population.js` contain stateful simulation

@@ -1,14 +1,15 @@
 import {
   changeOfBasis,
   complementaryMagnitude,
-  spinExpectationVectorFromDefaultBasis,
+  spinExpectation,
   spinorFromPolarComponents,
-  timeEvolveSpinorInField,
-} from './physics/index.js';
+} from './engine/index.js';
 import { createBasisControls } from './view/basis-controls.js';
 import { renderChangeOfBasisMath } from './view/basis-math-display.js';
 import { Basis3D } from './view/basis3d.js';
 import { createFieldControls } from './view/field-controls.js';
+import { fieldVectorFromAngles } from './engine/math/rotations.js';
+import { precessSpinor } from './engine/physics/precession.js';
 
 const clocksContainer = document.getElementById('clocks');
 const basisListEl = document.getElementById('basisList');
@@ -42,7 +43,7 @@ function syncViews() {
   basisView.setBases(bases);
 
   const field = fieldControls.value();
-  const expectation = spinExpectationVectorFromDefaultBasis(spinor);
+  const expectation = spinExpectation(spinor);
   basisView.setFieldDirection(field.theta, field.phi, field.magnitude);
   basisView.setExpectationVector(expectation.x, expectation.y, expectation.z);
   bases[0]?.syncSpinControls?.(spinor);
@@ -86,7 +87,11 @@ function clearExtraBases() {
 
 function step(dt) {
   const field = fieldControls.value();
-  spinor = timeEvolveSpinorInField(spinor, dt, field.magnitude, field.theta, field.phi);
+  spinor = precessSpinor(
+    spinor,
+    fieldVectorFromAngles(field.magnitude, field.theta, field.phi),
+    dt
+  );
   syncViews();
 }
 

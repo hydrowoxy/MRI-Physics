@@ -1,4 +1,4 @@
-import { basisDirection } from '../physics/index.js';
+import { basisDirection } from '../engine/physics/index.js';
 
 // Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {

@@ -2,9 +2,8 @@ import {
   complex,
   complexMagnitude,
   complexPhaseRadians,
-  degreesToRadians,
-  normalizeDegrees,
-} from '../math/index.js';
+} from '../math/complex.js';
+import { normalizeDegrees } from '../math/rotations.js';
 
 export function complementaryMagnitude(magnitude) {
   return Math.sqrt(Math.max(0, 1 - magnitude * magnitude));
@@ -26,23 +25,17 @@ export function spinorFromPolarComponents(m0, phase0, m1, phase1) {
 }
 
 export function normalizeSpinor(spinor) {
-  const m0 = spinorComponentMagnitude(spinor[0]);
-  const m1 = spinorComponentMagnitude(spinor[1]);
-  const norm = Math.sqrt(m0 * m0 + m1 * m1) || 1;
-  return [
-    { re: spinor[0].re / norm, im: spinor[0].im / norm },
-    { re: spinor[1].re / norm, im: spinor[1].im / norm },
-  ];
+  const norm = Math.hypot(
+    complexMagnitude(spinor[0]),
+    complexMagnitude(spinor[1])
+  ) || 1;
+  return spinor.map((component) => complex(component.re / norm, component.im / norm));
 }
 
 export function spinorComponentMagnitude(component) {
   return complexMagnitude(component);
 }
 
-function spinorComponentPhaseRadians(component) {
-  return complexPhaseRadians(component);
-}
-
 export function spinorComponentPhaseDegrees(component) {
-  return normalizeDegrees(spinorComponentPhaseRadians(component) / degreesToRadians(1));
+  return normalizeDegrees(complexPhaseRadians(component) * 180 / Math.PI);
 }

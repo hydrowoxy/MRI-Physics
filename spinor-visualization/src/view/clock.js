@@ -1,7 +1,7 @@
 import {
   complexMagnitude,
   complexPhaseRadians,
-} from '../math/index.js';
+} from '../engine/math/index.js';
 
 // Lightweight 2D clock component showing magnitude and phase for a complex number
 export class Clock {
