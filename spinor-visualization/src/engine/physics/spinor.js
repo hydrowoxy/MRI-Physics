@@ -46,3 +46,7 @@ export class Spinor {
 export function spinorFromComponents(alpha, beta) {
   return new Spinor(alpha, beta);
 }
+
+// for spinor operations idk like there are sinor oeerastions in the  math folder too
+// not sure how to go about this 
+// it is a hysics object so idk this feels alright but

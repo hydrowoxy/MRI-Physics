@@ -33,3 +33,6 @@ export function measureAlongAxis(components, axis, random = Math.random) {
   const positiveProbability = (1 + projection) / 2;
   return random() < positiveProbability ? 1 : -1;
 }
+
+/// why measurment bruh
+// that is not a hysics concet

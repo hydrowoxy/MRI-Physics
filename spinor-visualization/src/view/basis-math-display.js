@@ -21,3 +21,4 @@ export function renderChangeOfBasisMath({ spinor, theta, phi, result }) {
     `g = ${formatComplex(g)}`,
   ].join('\n');
 }
+
