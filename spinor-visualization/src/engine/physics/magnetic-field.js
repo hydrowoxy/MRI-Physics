@@ -30,3 +30,7 @@ export function createMagneticField(config = {}) {
     time,
   });
 }
+
+
+// i feel that having operators rather than just like magnetic field idk could be useful
+// since technically operators will be interacting with spinors 
