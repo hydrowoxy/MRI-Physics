@@ -4,10 +4,12 @@ export function degreesToRadians(degrees) {
   return degrees * DEGREE;
 }
 
+// why
 export function normalizeDegrees(degrees) {
   return ((degrees % 360) + 360) % 360;
 }
 
+// spinor
 export function spinorFromPolarComponents(m0, phase0, m1, phase1) {
   return [
     { re: m0 * Math.cos(phase0), im: m0 * Math.sin(phase0) },
@@ -15,6 +17,7 @@ export function spinorFromPolarComponents(m0, phase0, m1, phase1) {
   ];
 }
 
+// again spinor specific idk
 export function spinorComponentPhaseDegrees(component) {
   return normalizeDegrees(Math.atan2(component.im, component.re) / DEGREE);
 }
@@ -70,3 +73,10 @@ export function fieldVectorFromAngles(magnitude, thetaDeg, phiDeg) {
     degreesToRadians(phiDeg)
   );
 }
+
+// maybe a vector file? for vector operations
+// why rotations
+// is that even math
+// idrk man
+// does that organization make sense
+// who knows
