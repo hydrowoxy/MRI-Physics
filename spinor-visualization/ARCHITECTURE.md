@@ -2,7 +2,15 @@
 
 ## Foundation
 
-Each spinor stores two complex probability amplitudes, alpha and beta. Operators evolve those amplitudes directly; outcome probabilities are their squared magnitudes in the chosen basis. Phase is essential for interference and cannot be recovered from probabilities alone.
+Each spinor stores two complex probability amplitudes, $\alpha$ and $\beta$:
+
+$$
+|\psi\rangle = \begin{pmatrix} \alpha \\ \beta \end{pmatrix},
+\qquad P_0 = |\alpha|^2, \quad P_1 = |\beta|^2,
+\qquad |\alpha|^2 + |\beta|^2 = 1.
+$$
+
+Operators evolve these amplitudes directly; probabilities refer to the chosen basis. Phase is essential for interference and cannot be recovered from probabilities alone.
 
 Amplitude clocks are the primary presentation of magnitude and phase. Changing the displayed basis transforms the representation without changing the underlying state. The current application focuses on a single spinor; ensemble simulation is future work.
 
@@ -29,21 +37,50 @@ The viewer receives detached snapshots through `render(snapshot)` and emits edit
 
 ## Operators and evolution
 
-Each operator or physical interaction has its own module under `physics/operators/`. Magnetic coupling lives in `magnetic.js`. General operators use row-major complex 2x2 matrices. Applying one returns amplitudes without automatic normalization.
+Each operator or physical interaction has its own module under `physics/operators/`. Magnetic coupling lives in `magnetic.js`. General operators use row-major complex $2 \times 2$ matrices. Applying one returns amplitudes without automatic normalization.
 
-An interaction receives `{position, timeSeconds}` and returns coefficients `omega` for `H/hbar = omega dot sigma / 2`. Each simulation step sums simultaneous contributions and applies `U = exp(-i H dt/hbar)` to each spinor. The current Hamiltonian representation is traceless and single-spin.
+An interaction receives `{position, timeSeconds}` and returns coefficients `omega`, representing $\boldsymbol{\omega}$ in
 
-Magnetic coupling comes from `H = -mu dot B`, with magnetic moment `mu = gamma S` and spin operator `S = hbar sigma / 2`. Thus the Hamiltonian coefficients are `omega = -gamma B`. Gamma is a particle-specific coupling parameter in rad/s/T. `physics/species.js` defines hydrogen-1 as the default, using the CODATA 2022 free-proton value `2.6752218708e8`. Chemical shielding is not yet modeled. The application accepts another spin-half species; magnetic functions also accept an explicit gamma. Higher-spin nuclei need a larger state representation. Fields use tesla, positions meters and gradients T/m. The longitudinal MRI gradient approximation adds `G dot r` to Bz. Core phases are radians; the existing basis-control API accepts degrees.
+$$
+\frac{H}{\hbar} = \frac{1}{2}\boldsymbol{\omega}\cdot\boldsymbol{\sigma}.
+$$
+
+Each simulation step sums simultaneous Hamiltonian contributions and evolves the spinor:
+
+$$
+U(\Delta t) = \exp\!\left(-\frac{i H\Delta t}{\hbar}\right),
+\qquad |\psi(t+\Delta t)\rangle = U(\Delta t)|\psi(t)\rangle.
+$$
+ The current Hamiltonian representation is traceless and single-spin.
+
+Magnetic coupling follows
+
+$$
+H = -\boldsymbol{\mu}\cdot\mathbf B,
+\qquad \boldsymbol{\mu} = \gamma\mathbf S,
+\qquad \mathbf S = \frac{\hbar}{2}\boldsymbol{\sigma},
+\qquad \boldsymbol{\omega} = -\gamma\mathbf B.
+$$
+
+The species parameter $\gamma$ is the signed gyromagnetic ratio in $\mathrm{rad\,s^{-1}\,T^{-1}}$. `physics/species.js` defaults to hydrogen-1 using the CODATA 2022 free-proton value
+
+$$
+\gamma_{\mathrm{^{1}H}} = 2.6752218708\times 10^8\;\mathrm{rad\,s^{-1}\,T^{-1}}.
+$$
+
+Chemical shielding is not yet modeled. The application accepts another spin-half species; magnetic functions also accept an explicit $\gamma$. Higher-spin nuclei need a larger state representation.
+
+Fields use tesla, positions meters and gradients $\mathrm{T\,m^{-1}}$. The longitudinal MRI gradient approximation adds $\Delta B_z = \mathbf G\cdot\mathbf r$ to $B_z$. Core phases are radians; the existing basis-control API accepts degrees.
 
 ## Time and state contracts
 
 - Simulation time is a safe integer count of microseconds. `step(count)` advances fixed steps; `stepUs` defaults to 1000 and can be set to 1.
 - Fields are sampled at each step's midpoint. Constant-H propagation is analytical; varying fields need step-size convergence checks. Microsecond clock resolution does not guarantee physical accuracy.
 - Browser timestamps only pace playback. Paused or hidden time is excluded, fractional step budget is retained, and scientific steps are not skipped.
-- Spinor amplitudes must be finite and normalized within 1e-10. Inputs and getters are copied; normalization is explicit rather than silently applied during evolution.
+- Spinor amplitudes must be finite and normalized within $10^{-10}$. Inputs and getters are copied; normalization is explicit rather than silently applied during evolution.
 - `reset()` restores constructor states and zero time while retaining current interactions. Snapshots are detached copies.
 - All next states are prepared before a step commits. Interaction callbacks should be pure for reproducible runs.
 
 Setup, tests and CI are documented in the [repository README](../README.md).
 
-At 1 T, hydrogen precesses at about 42.58 MHz. Constant-field propagation evaluates endpoints analytically, but the current millisecond steps and browser frame rate cannot resolve these cycles visually. Time-varying laboratory-frame fields need finer steps or an explicit rotating-frame model; the viewer does not slow physics by changing gamma.
+At $1\,\mathrm T$, hydrogen precesses at $f = \gamma |\mathbf B|/(2\pi) \approx 42.58\,\mathrm{MHz}$. Constant-field propagation evaluates endpoints analytically, but the current millisecond steps and browser frame rate cannot resolve these cycles visually. Time-varying laboratory-frame fields need finer steps or an explicit rotating-frame model; the viewer does not slow physics by changing $\gamma$.
