@@ -1,52 +1,21 @@
-import {
-  complex,
-  spinorComponentMagnitude,
-} from '../math/complex.js';
-import { spinorComponentPhaseDegrees } from '../math/rotations.js';
+// Encapsulated normalized two-component quantum state with detached accessors.
 
+import { complex } from '../math/complex.js';
+import { assertNormalizedSpinor } from './state.js';
+import { applyOperator } from './operators/index.js';
 export class Spinor {
-  constructor(alpha = complex(1, 0), beta = complex(0, 0)) {
-    this.setComponents([alpha, beta]);
-  }
-
-  get components() {
-    return [this.alpha, this.beta];
-  }
-
-  get alphaMagnitude() {
-    return spinorComponentMagnitude(this.alpha);
-  }
-
-  get betaMagnitude() {
-    return spinorComponentMagnitude(this.beta);
-  }
-
-  get alphaPhaseDegrees() {
-    return spinorComponentPhaseDegrees(this.alpha);
-  }
-
-  get betaPhaseDegrees() {
-    return spinorComponentPhaseDegrees(this.beta);
-  }
-
+  #components;
+  constructor(alpha = complex(1), beta = complex(0)) { this.setComponents([alpha, beta]); }
+  get components() { return this.#components.map(c => ({...c})); }
+  get alpha() { return {...this.#components[0]}; }
+  get beta() { return {...this.#components[1]}; }
   setComponents(components) {
-    if (!Array.isArray(components) || components.length !== 2) {
-      throw new TypeError('a spinor requires exactly two complex components');
-    }
-    this.alpha = complex(components[0].re, components[0].im);
-    this.beta = complex(components[1].re, components[1].im);
+    assertNormalizedSpinor(components);
+    this.#components = components.map(c => ({...c}));
     return this;
   }
-
-  clone() {
-    return new Spinor(this.alpha, this.beta);
-  }
+  // Commits only operators whose output is a valid normalized state.
+  apply(operator) { return this.setComponents(applyOperator(operator, this.#components)); }
+  clone() { return new Spinor(...this.components); }
 }
-
-export function spinorFromComponents(alpha, beta) {
-  return new Spinor(alpha, beta);
-}
-
-// for spinor operations idk like there are sinor oeerastions in the  math folder too
-// not sure how to go about this 
-// it is a hysics object so idk this feels alright but
+export function spinorFromComponents(alpha, beta) { return new Spinor(alpha, beta); }

@@ -1,14 +1,10 @@
-import {
-  normalizedAmplitudePair,
-  normalizeSpinor,
-  spinorComponentMagnitude,
-} from '../engine/math/complex.js';
-import {
-  degreesToRadians,
-  normalizeDegrees,
-  spinorComponentPhaseDegrees,
-  spinorFromPolarComponents,
-} from '../engine/math/rotations.js';
+// Basis selection and quantum-amplitude editing widgets.
+
+import { normalizedAmplitudePair } from './amplitude-controls.js';
+import { normalizeSpinor, spinorFromPolarComponents } from '../engine/physics/state.js';
+import { complexMagnitude as spinorComponentMagnitude } from '../engine/math/complex.js';
+import { degreesToRadians, normalizeDegrees } from '../engine/math/angles.js';
+import { spinorComponentPhaseDegrees } from './physics-input.js';
 import { Clock } from './clock.js';
 import { createSnapState, snapSliderValue } from './snap-slider.js';
 

@@ -1,3 +1,5 @@
+// Slider snapping with retained target state.
+
 export function createSnapState() {
   return { target: null };
 }

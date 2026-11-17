@@ -1,46 +1,8 @@
-import { complex, complexAdd, complexMul, complexScale } from '../math/complex.js';
-import { normalizeVector, vectorMagnitude } from '../math/rotations.js';
+// Single-spin magnetic evolution through the Zeeman Hamiltonian and propagator.
 
-export function evolveSpinorInField(
-  components,
-  field,
-  deltaTime,
-  gyromagneticRatio = 1
-) {
-  const fieldMagnitude = vectorMagnitude(field);
-  if (fieldMagnitude === 0 || deltaTime === 0) {
-    return [
-      complex(components[0].re, components[0].im),
-      complex(components[1].re, components[1].im),
-    ];
-  }
-
-  const axis = normalizeVector(field);
-  const halfAngle = gyromagneticRatio * fieldMagnitude * deltaTime / 2;
-  const cosine = Math.cos(halfAngle);
-  const sine = Math.sin(halfAngle);
-  const diagonal = complex(cosine, 0);
-  // U = cos(theta) I - i sin(theta) (nx sigma_x + ny sigma_y + nz sigma_z).
-  // The two off-diagonal entries differ in the sign of the y contribution.
-  const offDiagonal = complex(
-    -axis.y * sine,
-    -axis.x * sine
-  );
-  const lowerOffDiagonal = complex(
-    axis.y * sine,
-    -axis.x * sine
-  );
-  const zTerm = complexScale(complex(0, 1), -axis.z * sine);
-
-  return [
-    complexAdd(
-      complexMul(complexAdd(diagonal, zTerm), components[0]),
-      complexMul(offDiagonal, components[1])
-    ),
-    complexAdd(
-      complexMul(lowerOffDiagonal, components[0]),
-      complexMul(complexAdd(diagonal, complexScale(zTerm, -1)), components[1])
-    ),
-  ];
+import { DEFAULT_SPECIES } from './species.js';
+import { applyOperator, propagator } from './operators/index.js';
+import { zeemanHamiltonian } from './operators/magnetic.js';
+export function evolveSpinorInField(components, field, deltaTime, gyromagneticRatio = DEFAULT_SPECIES.gyromagneticRatio) {
+  return applyOperator(propagator(zeemanHamiltonian(field, gyromagneticRatio), deltaTime), components);
 }
-

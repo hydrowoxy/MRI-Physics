@@ -1,6 +1,8 @@
+// Passive spinor basis transformations; this API accepts angles in degrees.
+
 import { complexAdd, complexMul, complexScale } from '../math/complex.js';
-import { degreesToRadians } from '../math/rotations.js';
-import { getSpinExpectationVector } from './measurement.js';
+import { degreesToRadians } from '../math/angles.js';
+import { getSpinExpectationVector } from './observables.js';
 
 function changeOfBasisF(a, b, thetaDeg, phiDeg) {
   const theta = degreesToRadians(thetaDeg);

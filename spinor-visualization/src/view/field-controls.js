@@ -1,3 +1,5 @@
+// Magnetic-field input widgets and change notifications.
+
 import { createSnapState, snapSliderValue } from './snap-slider.js';
 
 export function createFieldControls({ onChange }) {

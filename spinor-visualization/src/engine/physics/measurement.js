@@ -1,38 +1,11 @@
-function probability(component) {
-  return component.re * component.re + component.im * component.im;
+// Born-rule outcome sampling without a projective state update.
+
+import { getSpinExpectationVector } from './observables.js';
+export function sampleSpinAlongAxis(components, axis, random = Math.random) {
+  if (Math.abs(Math.hypot(axis.x, axis.y, axis.z) - 1) > 1e-10) throw new RangeError('unit axis required');
+  const b = getSpinExpectationVector(components);
+  const p = Math.max(0, Math.min(1, (1 + b.x*axis.x + b.y*axis.y + b.z*axis.z)/2));
+  const draw = random();
+  if (!Number.isFinite(draw) || draw < 0 || draw >= 1) throw new RangeError('random must return [0,1)');
+  return draw < p ? 1 : -1;
 }
-
-export function getSpinExpectationVector(components) {
-  const alpha = components[0];
-  const beta = components[1];
-  const alphaProbability = probability(alpha);
-  const betaProbability = probability(beta);
-  const relative = {
-    re: alpha.re * beta.re + alpha.im * beta.im,
-    im: alpha.re * beta.im - alpha.im * beta.re,
-  };
-
-  return {
-    x: 2 * relative.re,
-    y: 2 * relative.im,
-    z: alphaProbability - betaProbability,
-  };
-}
-
-export function measurementProbabilities(components) {
-  const alpha = components[0];
-  const beta = components[1];
-  return { alpha: probability(alpha), beta: probability(beta) };
-}
-
-export function measureAlongAxis(components, axis, random = Math.random) {
-  const expectation = getSpinExpectationVector(components);
-  const projection = expectation.x * axis.x
-    + expectation.y * axis.y
-    + expectation.z * axis.z;
-  const positiveProbability = (1 + projection) / 2;
-  return random() < positiveProbability ? 1 : -1;
-}
-
-/// why measurment bruh
-// that is not a hysics concet

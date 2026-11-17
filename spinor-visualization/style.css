@@ -15,3 +15,6 @@ header { margin-bottom: 8px }
 .basis-card input[type="range"]{ width:120px }
 .basis-controls { display:flex; gap:8px; align-items:center }
 .basis-math { margin:0; padding:8px; width:100%; max-width:360px; overflow:auto; background:#f7f8fb; border:1px solid #e3e6ee; border-radius:4px; font:12px/1.35 ui-monospace, SFMono-Regular, Consolas, monospace; color:#222 }
+
+/* this is ugly later roblem tho */
+/* scss down the line? */

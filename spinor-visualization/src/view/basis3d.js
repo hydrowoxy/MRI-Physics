@@ -1,6 +1,7 @@
+// Three.js presentation of basis directions, fields and derived Bloch expectations.
+
 import { basisDirection } from '../engine/physics/index.js';
 
-// Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {
   constructor(container) {
     this.container = container;
@@ -243,7 +244,7 @@ export class Basis3D {
     }
 
     const direction = vec.clone().normalize();
-    // Physical scaling: rendered tip radius should equal |S| (Bloch sphere radius = 1).
+    // Rendered tip radius equals the dimensionless Bloch expectation magnitude.
     const length = mag / this.expectationTipLocalPeak;
 
     if (!this.expectationGroup) {
