@@ -32,3 +32,25 @@ test('headless and controller-driven simulations agree with a snapshot-only cons
   assert.notEqual(a.snapshot().spins[0].components[0].re,77);
   ca.reset();assert.equal(a.timeUs,0);ca.frame(1000);assert.equal(a.timeUs,0);
 });
+
+// Slow motion changes elapsed simulation time, not the physical hydrogen coupling.
+test('hydrogen clocks advance smoothly at an explicit slow-motion rate',()=>{
+  const state=new Spinor({re:Math.SQRT1_2,im:0},{re:Math.SQRT1_2,im:0});
+  const s=new Simulation({spins:[{state}],stepPs:1});
+  const controller=new SimulationController({simulation:s,viewer:{render:()=>{}},field:{x:0,y:0,z:1},playbackRate:1e-10});
+  controller.setPlaying(true);controller.frame(0);controller.frame(1000);
+  assert.ok(s.timePs >= 99n && s.timePs <= 100n);
+  const phase=Math.atan2(s.snapshot().spins[0].components[0].im,s.snapshot().spins[0].components[0].re);
+  assert.ok(Math.abs(phase-2.6752218708e8*Number(s.timePs)*1e-12/2)<1e-10);
+});
+
+// Rate changes discard the old timestamp anchor so long gaps do not become catch-up work.
+test('playback speed can change without changing physical parameters or jumping time',()=>{
+  const s=new Simulation({stepPs:1}),p=new Playback(s,{rate:1e-11});
+  p.setPlaying(true);p.frame(0);p.frame(1000);
+  assert.ok(s.timePs>=9n && s.timePs<=10n);
+  const before=s.timePs;
+  p.setRate(1e-12);p.frame(10000);assert.equal(s.timePs,before);
+  p.frame(11000);assert.ok(s.timePs-before<=2n);
+  assert.throws(()=>p.setRate(0));
+});

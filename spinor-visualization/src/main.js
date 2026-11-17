@@ -9,7 +9,7 @@ import { createFieldControls } from './view/field-controls.js';
 
 const simulation = new Simulation({
   spins:[{state:new Spinor(...spinorFromPolarComponents(0.8,0.2,complementaryMagnitude(0.8),-0.4))}],
-  stepUs:1000,
+  stepPs:1,
 });
 let controller;
 const viewer = new SpinorViewer({
@@ -22,7 +22,7 @@ const fieldControls = createFieldControls({
   onChange:({magnitude,theta,phi})=>controller.setField(fieldVectorFromAngles(magnitude,theta,phi)),
 });
 const field = fieldControls.value();
-controller = new SimulationController({simulation,viewer,field:fieldVectorFromAngles(field.magnitude,field.theta,field.phi)});
+controller = new SimulationController({simulation,viewer,playbackRate:Number(document.getElementById('playbackRate').value),field:fieldVectorFromAngles(field.magnitude,field.theta,field.phi)});
 viewer.addBasis(0,0,'Default');
 document.getElementById('addBasis').addEventListener('click',()=>viewer.addBasis());
 document.getElementById('clear').addEventListener('click',()=>viewer.clearExtraBases());
@@ -30,7 +30,11 @@ document.getElementById('togglePlay').addEventListener('click',event=>{
   controller.setPlaying(!controller.playing);
   event.target.textContent=controller.playing?'Pause':'Play';
 });
+document.getElementById('playbackRate').addEventListener('change',event=>controller.setPlaybackRate(Number(event.target.value)));
 document.addEventListener('visibilitychange',()=>controller.setSuspended(document.hidden));
 controller.setSuspended(document.hidden);
-function frame(now) { controller.frame(now); requestAnimationFrame(frame); }
+function frame(now) {
+  controller.frame(now);
+  requestAnimationFrame(frame);
+}
 requestAnimationFrame(frame);

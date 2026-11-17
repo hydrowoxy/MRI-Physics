@@ -74,8 +74,8 @@ Fields use tesla, positions meters and gradients $\mathrm{T\,m^{-1}}$. The longi
 
 ## Time and state contracts
 
-- Simulation time is a safe integer count of microseconds. `step(count)` advances fixed steps; `stepUs` defaults to 1000 and can be set to 1.
-- Fields are sampled at each step's midpoint. Constant-H propagation is analytical; varying fields need step-size convergence checks. Microsecond clock resolution does not guarantee physical accuracy.
+- Simulation time is an integer picosecond count (`BigInt`). `step(count)` advances fixed steps; configure `stepPs` for fine resolution or `stepUs` for whole microseconds (default 1000). Snapshots provide exact `timePs` as a decimal string and approximate numeric `timeUs`.
+- Fields are sampled at each step's midpoint. Constant-H propagation is analytical; varying fields need step-size convergence checks. Clock resolution does not guarantee physical accuracy.
 - Browser timestamps only pace playback. Paused or hidden time is excluded, fractional step budget is retained, and scientific steps are not skipped.
 - Spinor amplitudes must be finite and normalized within $10^{-10}$. Inputs and getters are copied; normalization is explicit rather than silently applied during evolution.
 - `reset()` restores constructor states and zero time while retaining current interactions. Snapshots are detached copies.
@@ -83,4 +83,7 @@ Fields use tesla, positions meters and gradients $\mathrm{T\,m^{-1}}$. The longi
 
 Setup, tests and CI are documented in the [repository README](../README.md).
 
-At $1\,\mathrm T$, hydrogen precesses at $f = \gamma |\mathbf B|/(2\pi) \approx 42.58\,\mathrm{MHz}$. Constant-field propagation evaluates endpoints analytically, but the current millisecond steps and browser frame rate cannot resolve these cycles visually. Time-varying laboratory-frame fields need finer steps or an explicit rotating-frame model; the viewer does not slow physics by changing $\gamma$.
+The viewer uses explicit slow motion: the default is 0.01 simulated nanoseconds per wall-clock second, using 1 ps steps. A speed selector exposes the active pacing. Hydrogen coupling remains physical. Headless stepping is unaffected by playback rate.
+
+
+Reference checks in `test/reference.test.js` cover the handwritten basis equations, the field-basis evolution on `main`, and canvas clock radius/phase. In `paint-math/90deg.png`, the stated input and equations yield $(f,g)=(0,1)$; the final sketch labels them in reverse. Basis equations are unchanged from `main`; magnetic evolution uses physical hydrogen coupling, whose phase direction differs from the old unitless convention.

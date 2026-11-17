@@ -8,13 +8,13 @@ export class SimulationController {
   #field;
   #gamma;
   #playback;
-  constructor({simulation, viewer, field={x:0,y:0,z:0}, species=DEFAULT_SPECIES, gamma=species.gyromagneticRatio}) {
+  constructor({simulation, viewer, field={x:0,y:0,z:0}, species=DEFAULT_SPECIES, gamma=species.gyromagneticRatio, playbackRate=1}) {
     this.#simulation = simulation;
     this.#viewer = viewer;
     validateSpecies(species);
     if (!Number.isFinite(gamma)) throw new TypeError('finite gamma required');
     this.#gamma = gamma;
-    this.#playback = new Playback(simulation);
+    this.#playback = new Playback(simulation, {rate:playbackRate});
     this.setField(field);
   }
   get playing() { return this.#playback.playing; }
@@ -30,6 +30,7 @@ export class SimulationController {
     this.render();
   }
   setSpinState(components, index=0) { this.#simulation.setSpinState(index,components); this.render(); }
+  setPlaybackRate(rate) { this.#playback.setRate(rate); }
   setPlaying(value) { this.#playback.setPlaying(value); }
   setSuspended(value) { this.#playback.setSuspended(value); }
   frame(nowMs) { if (this.#playback.frame(nowMs)) this.render(); }

@@ -48,8 +48,10 @@ export class Clock {
     const phase = complexPhaseRadians(this.value);
     if (displayR > 0) {
       const visualPhase = -phase;
-      const hx = cx + Math.cos(visualPhase) * (displayR - 10);
-      const hy = cy + Math.sin(visualPhase) * (displayR - 10);
+      // Keep small-amplitude hands inside their radius without reversing phase.
+      const handLength = Math.max(0, displayR - Math.min(10, displayR * 0.2));
+      const hx = cx + Math.cos(visualPhase) * handLength;
+      const hy = cy + Math.sin(visualPhase) * handLength;
       ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(hx,hy); ctx.strokeStyle='#222'; ctx.lineWidth=3; ctx.stroke();
     }
     ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fillStyle='#222'; ctx.fill();

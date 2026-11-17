@@ -1,9 +1,9 @@
 // Text formatting for the amplitude change-of-basis calculation.
 
 function formatComplex(z){
-  const re = z.re.toFixed(2);
+  const re = Number(z.re.toFixed(2)).toFixed(2);
   const imAbs = Math.abs(z.im).toFixed(2);
-  const sign = z.im < 0 ? '-' : '+';
+  const sign = z.im < 0 && Number(imAbs) !== 0 ? '-' : '+';
   return `${re} ${sign} ${imAbs}i`;
 }
 

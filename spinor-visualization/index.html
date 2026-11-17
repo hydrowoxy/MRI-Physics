@@ -17,17 +17,26 @@
         <button id="clear">Clear All</button>
       </div>
       <div id="basisList"></div>
+      <label>Playback speed
+        <select id="playbackRate">
+          <option value="1e-12">0.001 ns / second</option>
+          <option value="1e-11" selected>0.01 ns / second</option>
+          <option value="1e-10">0.1 ns / second</option>
+          <option value="1e-9">1 ns / second</option>
+          <option value="3e-9">3 ns / second</option>
+        </select>
+      </label>
       <div class="control-row">
         <label>
           <span id="bMagLabel">Magnetic field |B| 1.0</span>
           <input id="bMag" type="range" min="0" max="10" step="0.1" value="1">
         </label>
         <label>
-          <span id="bThetaLabel">Field θ 90°</span>
+          <span id="bThetaLabel">Field Î¸ 90Â°</span>
           <input id="bTheta" type="range" min="0" max="180" value="90">
         </label>
         <label>
-          <span id="bPhiLabel">Field φ 0°</span>
+          <span id="bPhiLabel">Field Ï† 0Â°</span>
           <input id="bPhi" type="range" min="0" max="360" value="0">
         </label>
         <button id="togglePlay">Play</button>
